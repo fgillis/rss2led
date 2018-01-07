@@ -1,0 +1,49 @@
+        <h1>New York, NY Weather</h1>
+        <!-- now_us -->
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card" id="current">
+            <div class="card-header">
+                <h4 class="card-title">Now</h4>
+                <h5 class="card-subtitle">
+                    <small>Observed @ New York City, Central Park, NY</small>
+                </h5>
+            </div>
+            <div class="card-block">
+                <div class="row">
+                    <div class="col-sm-5 text-xs-center">
+                        <p class="icon sunny"></p>
+                        <p class="summary">Fair</p>
+                        <p class="temp">6&deg;F</p>
+                    </div>
+                    <div class="col-sm-7">
+                        <dl class="row">
+                            <dt class="col-xs-5">Humidity:</dt>
+                            <dd class="col-xs-7" id="humidity">52                                %
+                            </dd>
+                            <dt class="col-xs-5">Wind Speed:</dt>
+                            <dd class="col-xs-7" id="windspeed">11                                &nbsp;mph
+                            </dd>
+                            <dt class="col-xs-5">Wind Direction:</dt>
+                            <dd class="col-xs-7" id="winddir">
+                                Northwest (310&deg;)                            </dd>
+                            <dt class="col-xs-5">Barometer:</dt>
+                            <dd class="col-xs-7" id="pressure">30.46                                in.
+                            </dd>
+                            <dt class="col-xs-5">Dewpoint:</dt>
+                            <dd class="col-xs-7"
+                                id="dewpoint">-8.0&deg;F
+                            </dd>
+                            <!--    <dt>Heat Index:</dt><dd id="heatindex"><span style="color:red">71&deg;F</span></dd>-->
+                                                            <dt class="col-xs-5">Wind Chill:</dt>
+                                <dd class="col-xs-7"
+                                    id="windchill">-9&deg;F
+                                </dd>
+                                                        <dt class="col-xs-5">Visibility:</dt>
+                            <dd class="col-xs-7"
+                                id="visibility">10&nbsp;miles
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
