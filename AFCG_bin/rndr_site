@@ -1,0 +1,52 @@
+#!/bin/csh -f
+
+set HOSTS = "w3"
+set DIREC = $1
+set SLEEP = $2
+
+set INDX_A = "${LOCAL_BIN}/rndr_site_html/rndr_site_A.shtml"
+set INDX_B = "${LOCAL_BIN}/rndr_site_html/rndr_site_B.shtml"
+set SITE   = "${proj}/Rndr_Site"
+set TEMP   = "${proj}/Rndr_Site/temp"
+
+if (-e $TEMP/temp_1.txt) then
+  rm ${TEMP}/temp_*.txt
+endif
+
+if (-e $SITE/rndr_view.shtml) then
+  rm ${SITE}/rndr_view.shtml
+endif
+
+cat << LABEL > ${TEMP}/ftp.cmd 
+  open ftp.afcg.com
+  user rndr_site@afcg.com Rndr_sitE
+  cd ${DIREC}
+  put rndr_view.shtml
+  bye
+LABEL
+
+set LOOP = 1
+while ($LOOP)
+
+  if (-e ${TEMP}/temp_3.txt) cp ${TEMP}/temp_3.txt ${TEMP}/temp_4.txt
+  if (-e ${TEMP}/temp_2.txt) cp ${TEMP}/temp_2.txt ${TEMP}/temp_3.txt
+  if (-e ${TEMP}/temp_1.txt) cp ${TEMP}/temp_1.txt ${TEMP}/temp_2.txt
+
+  echo "JOB: " ${proj}		>  ${TEMP}/temp_0.txt
+
+  rndr_view 0 ${HOSTS}		>  ${TEMP}/temp_1.txt
+
+  cat ${INDX_A} ${TEMP}/temp_0.txt ${TEMP}/temp_1.txt >  ${SITE}/rndr_view.shtml
+  if (-e ${TEMP}/temp_2.txt) cat ${TEMP}/temp_2.txt   >> ${SITE}/rndr_view.shtml
+  if (-e ${TEMP}/temp_3.txt) cat ${TEMP}/temp_3.txt   >> ${SITE}/rndr_view.shtml
+  if (-e ${TEMP}/temp_4.txt) cat ${TEMP}/temp_4.txt   >> ${SITE}/rndr_view.shtml
+  cat ${INDX_B}                                       >> ${SITE}/rndr_view.shtml
+
+  ftp -n < ${TEMP}/ftp.cmd
+
+  sleep  ${SLEEP}
+
+end
+
+exit
+

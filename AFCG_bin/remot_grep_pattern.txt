@@ -1,0 +1,5 @@
+irndr
+rndr
+mantra
+batch
+csh

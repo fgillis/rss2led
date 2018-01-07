@@ -1,0 +1,123 @@
+#
+#	This library of Action Expression functions is loaded by action on
+#	initialization.  These function can be used in any Action expression.
+#
+
+area_scal(tx, cex, area, scal) # returns value 0-1*scale based on BBX pos.
+{
+    mini = cex - (area * 0.5);
+    maxi = cex + (area * 0.5);
+    dist = abs(maxi - mini);
+
+    if ((tx >= mini) && (tx <= maxi)) {
+	ofst = abs((tx - mini)/dist);
+	return (sin(ofst*360-90)+1)*0.5*scal;
+    } else {
+	return 0;
+    }
+}
+
+
+bbox_scal(bbox, scal) # returns value -0.5 to 0.5 * scale based on BBOX pos.
+{
+    return sin(bbox*360-90)*scal;
+}
+
+
+maximum(a, b)				# Return the maximum of a or b
+{
+    if (a > b) return a;
+    return b;
+}
+
+minimum(a, b)				# Return the minimum of a or b
+{
+    if (a < b) return a;
+    return b;
+}
+
+length(x, y, z)				# Vector length
+{
+    return sqrt(x*x + y*y + z*z);
+}
+
+distance(x1, y1, x2, y2)				# Vector length
+{
+    return sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+}
+
+factorial(n)				# Factorial
+{
+    for (fact = 1; n > 1; n--) fact *= n;
+    return fact;
+}
+
+quadratic(a, b, c)			# Solve quadratic equation (one root)
+{
+    q = b*b - 4*a*c;
+    if (q < 0) return 0;
+    return (sqrt(q)-b)/(2*a);
+}
+
+timecode(hour, min, sec, frame)		# Return Action frame number for TC.
+{
+    return 1 + frame + $FPS*(sec + 60*(min + 60*hour));
+}
+
+
+steps(strt_valu, stop_valu, jumps, strt_fram, stop_fram, crnt_fram)
+{
+    sample = ((crnt_fram - strt_fram)/(stop_fram - strt_fram)) * jumps;
+    incrmn = abs(stop_valu - strt_valu) / jumps;
+
+    if (strt_valu < stop_valu) {
+	return strt_valu + (incrmn * int(sample));
+    }
+
+    if (strt_valu > stop_valu) {
+	return strt_valu - (incrmn * int(sample));
+    }
+}
+
+
+# newease types:
+# -------------------------
+#	1	ease in/out
+#	2	ease in
+#	3	ease out
+#	4	linear
+# -------------------------
+newease(type, beg_valu, end_valu, beg_fram, end_fram, crn_fram)
+{
+    ease_samp = (crn_fram - beg_fram) / (end_fram - beg_fram);
+
+    if (ease_samp < 0.0)
+	return beg_valu;
+
+    if (ease_samp > 1.0)
+	return end_valu;
+
+    if ((ease_samp >= 0.0) && (ease_samp <= 1.0)) {
+
+	if (type == 1) {
+ 	    angle  = ease_samp * 180.0;	
+ 	    multpl = 0.5 - (cos(angle) * 0.5);
+	}
+
+	if (type == 2) {
+ 	    angle  = ease_samp * 90.0;	
+ 	    multpl = 1.0 - cos(angle);
+	}
+
+	if (type == 3) {
+ 	    angle  = ease_samp * 90.0;	
+ 	    multpl = sin(angle);
+	}
+
+	if (type == 4) {
+ 	    multpl = ease_samp;
+	}
+
+	return (beg_valu + (multpl * (end_valu - beg_valu)));
+    }
+}

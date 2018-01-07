@@ -1,0 +1,203 @@
+#!/bin/csh -f
+
+set MODE = $1
+set STRT = $2
+set STOP = $3
+set INCR = $4
+set IMAG = $5
+set MACH = $6
+
+# *********************************************************
+# ************ LIST TO SET MACHINE OS *********************
+# *********************************************************
+  if (${MACH} == "w1") set OS = linux
+  if (${MACH} == "w3") set OS = linux
+  if (${MACH} == "w4") set OS = osx
+  if (${MACH} == "w5") set OS = osx
+# *********************************************************
+# *********************************************************
+# *********************************************************
+
+if (${INCR} == 0) then
+    echo " "
+    echo "irndr error: frame increment cannot = 0"
+    echo " "
+    exit -1
+endif
+
+if (${MODE} == "IO") then
+  if ($#argv != 10) then
+    echo " "
+    echo "Usage error: irndr IO STRT STOP INCR IMAG HOST HIPP DSPL CMRA ROP
+    echo " "
+    exit -1
+  endif
+
+  set HOUD = $7
+  set DSPL = $8
+  set CMRA = $9
+  set ROPP = $10
+
+  set HIPP      = "${hips}/${HOUD}.hip"
+
+  touch ${HIPP}
+endif
+
+if (${MODE} == "MO") then
+  if ($#argv != 10) then
+    echo " "
+    echo "Usage error: irndr MO STRT STOP INCR IMAG HOST XRES YRES SAMP EXT"
+    echo " "
+    exit -1
+  endif
+
+  set XRES = $7
+  set YRES = $8
+  set SAMP = $9
+  set FRMT = $10
+
+  set RESO      = "${XRES}x${YRES}"
+endif
+
+# ---------------------------------------------------------------------------
+umask 002
+# ---------------------------------------------------------------------------
+
+set TIME = `date '+ %b %d %H:%M'`
+
+set RANG = "${STRT} ${STOP} ${INCR}"
+set ELEM = "${IMAG}"
+
+if (${OS} == "linux") then
+  set IFDS = "${ifds_lnx}/${IMAG}"
+  set IMAG = "${pics_lnx}/${IMAG}"
+endif
+
+if (${OS} == "osx") then
+  set IFDS = "${ifds_osx}/${IMAG}"
+  set IMAG = "${pics_osx}/${IMAG}"
+endif
+
+set IFD_INPT = "${scrp}/rndr_outp/${MACH}_ifd_inpt.txt"
+set IFD_OUTP = "${scrp}/rndr_outp/${MACH}_ifd_outp.txt"
+set IMG_INPT = "${scrp}/rndr_outp/${MACH}_img_inpt.txt"
+set IMG_OUTP = "${scrp}/rndr_outp/${MACH}_img_outp.txt"
+set IMG_SHEL = "${scrp}/rndr_outp/${MACH}_img_shel.sh"
+
+set NAWK = "${LOCAL_BIN}/irndr.awk"
+
+# ===========================================================================
+# Remove ifds, pics, and/or ifd/img inpt/outp files 
+# ===========================================================================
+if ($MODE == "IO") then
+  if (-e ${IFD_INPT}) then
+    rm ${IFD_INPT}
+  endif
+
+  if (-e ${IFD_OUTP}) then
+    rm ${IFD_OUTP}
+  endif
+
+  set FRAM = $STRT
+  while ($FRAM <= $STOP)
+    if (-e ${IFDS}.${FRAM}.ifd) then
+      rm ${IFDS}.${FRAM}.ifd 
+    endif
+    @ FRAM = $FRAM + $INCR
+  end
+endif
+
+if ($MODE == "MO") then
+  if (-e ${IMG_INPT}) then
+    rm ${IMG_INPT}
+  endif
+  if (-e ${IMG_OUTP}) then
+    rm ${IMG_OUTP}
+  endif
+  if (-e ${IMG_SHEL}) then
+    rm ${IMG_SHEL}
+  endif
+endif
+
+# ===========================================================================
+# IF MODE = "IO" MODIFY RENDER OUTPUT DRIVER AND CREATE IFD's
+# ===========================================================================
+if ($MODE == "IO") then
+
+cat << LABEL_A > ${IFD_INPT}
+
+  opcf /out
+
+  opparm ${ROPP} trange			( normal )
+  opparm ${ROPP} f			( ${RANG} )
+  opparm ${ROPP} camera			( /obj/${CMRA} )
+  opparm ${ROPP} soho_outputmode	( on )
+  opparm ${ROPP} soho_diskfile		( '${IFDS}.\$FF.ifd' )
+
+  opparm ${ROPP} prerender		( 'unix echo ifds INIT ${RANG} ${ELEM} ${TIME}' )
+  opparm ${ROPP} preframe		( 'unix echo FRAME \$FF                       ' )
+  opparm ${ROPP} postframe		( '                                           ' )
+  opparm ${ROPP} postrender		( 'unix echo ifds DONE ${RANG} ${ELEM}        ' )
+
+  cmdread ${scrp}/${DSPL}_dspl.cmd
+
+  opcf /out
+  render ${ROPP}
+  quit
+
+LABEL_A
+
+  if (${MACHINE} == ${MACH}) then
+    echo "*** Generating ifds on ${MACH} ***"
+    hbatch -q ${HIPP} < ${IFD_INPT}  >& ${IFD_OUTP}
+    date '+DONE_TIME %b %d %H:%M'   >>& ${IFD_OUTP}
+  endif
+
+  if (${MACHINE} != ${MACH}) then
+    echo "*** ERROR: NOT SETUP TO GENERATE IFD's REMOTELY ***"
+    exit -1
+  endif
+
+endif
+
+# ===========================================================================
+# IF MODE = "MO" RENDER THE PREVIOUSLY CREATED IFD's
+# ===========================================================================
+if ($MODE == "MO") then
+ 
+cat << LABEL_B			> ${IMG_INPT}
+
+  rang ${RANG}
+  ifds ${IFDS}
+  pics ${IMAG}
+  elem ${ELEM}
+  reso ${RESO}
+  samp ${SAMP}
+  frmt ${FRMT}
+  time ${TIME}
+    
+LABEL_B
+
+  awk -f ${NAWK} proj=${proj} outp=${IMG_OUTP} ${IMG_INPT} > ${IMG_SHEL}
+  chmod ug+x ${IMG_SHEL}
+
+    if (${MACHINE} == ${MACH}) then
+      echo "*** Rendering locally on ${MACHINE} ***"
+      csh ${IMG_SHEL}
+    endif
+
+    if (${MACHINE} != ${MACH}) then
+      if (${MACHINE} == "w4.local") then
+        echo "*** Rendering locally on ${MACHINE} ***"
+        csh ${IMG_SHEL}
+      else
+        echo "*** Rendering remotely on ${MACH} ***"
+#       ssh -X ${MACH} ${IMG_SHEL}
+        ssh ${MACH} ${IMG_SHEL}
+      endif
+    endif
+
+endif
+
+exit 0
+

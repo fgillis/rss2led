@@ -1,0 +1,67 @@
+#!/bin/csh -f
+
+if ( "$argv" == "-" || "$argv" == "" ) then
+  echo " "
+  echo -n "Usage: `basename $0` [host_1] [host_2] [etc]"
+  echo " "
+  exit 1
+endif
+
+set ARGS      = $#argv
+set NAWK_RNDR = "${LOCAL_BIN}/rndr_view.awk"
+set NAWK_COMP = "${LOCAL_BIN}/comp_view.awk"
+
+set LOOP = 1
+while ($LOOP)
+
+  if($argv[1] != 0) then
+    clear
+    echo ""
+    echo "rndr_view:  "`date '+%b %d %H:%M'`"  job: "${proj}"             loop: "${LOOP}
+  else
+    echo ""
+    echo `date '+%b %d %H:%M'`
+  endif
+
+  echo "-------------------------------------------------------------------------------------------------"
+  echo " stat | mode |     element     | strt | stop |inc| crnt | summary |err| beg | end | timlft | host"
+  echo "-------------------------------------------------------------------------------------------------"
+
+  set i = 1
+  while ($i <= $ARGS)
+
+      set IFD_OUTP = "${scrp}/rndr_outp/$argv[$i]_ifd_outp.txt"
+      set IMG_OUTP = "${scrp}/rndr_outp/$argv[$i]_img_outp.txt"
+
+      if (-e ${IFD_OUTP}) then
+        set TIME_NOW = `date +%s`
+        set FILE_AGE = `date +%s -r ${IFD_OUTP}`
+        @ FILE_SEC = ${TIME_NOW} - ${FILE_AGE}
+        @ FILE_HRS = ${FILE_SEC} / 3600
+        nawk -f ${NAWK_RNDR} mach=$argv[$i] hrs=${FILE_HRS} ${IFD_OUTP}
+      endif
+
+      if (-e ${IMG_OUTP}) then
+        set TIME_NOW = `date +%s`
+        set FILE_AGE = `date +%s -r ${IMG_OUTP}`
+        @ FILE_SEC = ${TIME_NOW} - ${FILE_AGE}
+        @ FILE_HRS = ${FILE_SEC} / 3600
+        nawk -f ${NAWK_RNDR} mach=$argv[$i] hrs=${FILE_HRS} ${IMG_OUTP}
+      endif
+
+    @ i++
+
+  end
+
+  echo ""
+
+  @ LOOP++
+
+  if($argv[1] == "0") then
+    set LOOP = 0
+  else
+    sleep 10
+  endif
+
+end
+

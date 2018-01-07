@@ -1,0 +1,40 @@
+#!/bin/csh -f
+
+if ( "$argv" == "-" || "$argv" == "" ) then
+  echo " "
+  echo -n "Usage: `basename $0` [so] [etc]"
+  echo " "
+  exit 1
+endif
+
+set ARGS      = $#argv
+set NAWK      = "${LOCAL_BIN}/comp_view.awk"
+
+set LOOP = 1
+while ($LOOP)
+
+  clear
+  echo ""
+  echo "comp_view:  "`date '+%b %d %H:%M'`"  job: "${proj}"             loop: "${LOOP}
+  echo ""
+  echo "------------------------------------------------------------------------------"
+  echo "cmp|stat|  element  | strt | stop |inc| crnt | sumry |err| beg | end | timlft"
+  echo "------------------------------------------------------------------------------"
+
+  set i = 1
+  while ($i <= $ARGS)
+
+    set OUTP = "${comp}/comp_outp/$argv[$i]_outp.txt"
+
+    nawk -f ${NAWK} mach=$argv[$i] ${OUTP}
+
+    @ i++
+
+  end
+
+  @ LOOP++
+
+  sleep 10
+
+end
+

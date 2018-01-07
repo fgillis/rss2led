@@ -1,0 +1,16 @@
+Rndr_Site:
+
+Sends render information to afcg web site server.
+
+1. Update "public_html/rndr_site/index.shtml" on the server.
+2. Create "public_html/rndr_site/JOB" directory on the server.
+3. Update the "DIREC" and "SLEEP" variables in "rndr_site.sh".
+
+The shell will output temp/ftp.cmd and several temp files that get combined to create "rndr_view.shtml" which
+gets ftp'd to the appropriate directory on the server.
+
+Go to www.afcg.com/rndr_site to view render details.
+
+This process currently defaults to checking render hosts "w3" only.
+To change this, edit the "HOSTS" variable in "${LOCAL_BIN}/rndr_site".
+

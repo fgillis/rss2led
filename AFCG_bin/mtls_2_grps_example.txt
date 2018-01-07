@@ -1,0 +1,3 @@
+clen:
+	nawk -f obj_mtls_2_grps.awk plunger_assembly_tool.obj	> clen_plunger_assembly_tool.obj	
+

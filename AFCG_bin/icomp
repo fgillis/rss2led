@@ -1,0 +1,63 @@
+#!/bin/csh -f
+
+# Mar 19, 2004 - Added output format choice
+# Apr 15, 2005 - Added RAT format choice
+# Jan 10, 2006 - Added PADD option and removed "_" in output file name
+# Nov  7, 2007 - Update for Houdini 9
+# Aug 12, 2008 - Update for Houdini 9.5
+# Jan 27, 2011 - Update for Houdini 11.0
+
+set STRT = $1
+set STOP = $2
+set INCR = $3
+set HIPP = $4
+set DRVR = $5
+set XRES = $6
+set YRES = $7
+set MACH = $8
+
+if ($#argv != 8) then
+    echo " "
+    echo "Usage: $0 STRT STOP INCR HIPP DRVR XRES YRES MACH"
+    echo " "
+    exit 1
+endif
+
+umask 002
+
+set HIPP = "${comp}/${HIPP}.hip"
+set INPT = "${comp}/comp_outp/${MACH}_inpt.cmd"
+set ERRS = "${comp}/comp_outp/${MACH}_outp.txt"
+
+set RANG = "${STRT} ${STOP} ${INCR}"
+set TIME = `date '+ %b %d %H:%M'`
+
+# ---------------------------------------------------------------------------
+
+cat << LABEL_A			> ${INPT}
+
+    opcf /out
+    opparm ${DRVR} trange	( normal )
+    opparm ${DRVR} f		( $STRT $STOP $INCR )
+    opparm ${DRVR} tres		( specify )
+    opparm ${DRVR} res		( ${XRES} ${YRES} )
+
+    opparm ${DRVR} prerender	( 'echo INIT ${RANG} ${DRVR} ${TIME} '  )
+    opparm ${DRVR} preframe	( 'echo FRAM \$FF		     '  )
+    opparm ${DRVR} postframe 	( 'unix "date \'+DONE %b %d %H:%M\' "' )
+    opparm ${DRVR} postrender	( 'unix "date \'+EXIT %b %d %H:%M\' "' )
+
+    render ${DRVR}
+
+    quit
+
+LABEL_A
+
+# ---------------------------------------------------------------------------
+
+set mach = `hostname | awk '{print substr($0,1,2)}' `
+
+hbatch ${HIPP} < ${INPT} >& ${ERRS}
+ 
+exit
+

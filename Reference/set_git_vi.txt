@@ -1,0 +1,4 @@
+
+  git config --global core.editor "vi"
+  export GIT_EDITOR=vi
+
