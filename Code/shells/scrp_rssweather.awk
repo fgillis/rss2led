@@ -1,23 +1,28 @@
-Begin {
-  SCRAPE = 0
+BEGIN {
+  extract = 0;
 }
 
 {
 
-
-  if ($1 == "<h1>New") {
-    SCRAPE = 1    
+  if ($2 == "now_us") {
+    extract = 1;
   }
 
-  if ($3 == "text-muted") {
-    SCRAPE = 0    
+  if (extract == 1) {
+    FS="[<>&\=\"\:\;\)\(]";
+    for (i=1; i<=NF; i++) {
+      printf("%s ", $i)
+      if (i == NF) {
+        printf("\n");
+      }
+      if ($i == "forecast") {
+        extract = 0;
+      }
+    }
   }
-
-  if (SCRAPE == 1) {
-    printf("%s\n", $0)
-  }
-
 }
 
-End {
+END {
 }
+
+

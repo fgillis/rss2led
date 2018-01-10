@@ -1,0 +1,21 @@
+ !--   current weather --  
+ div id  current  class  fair   
+		 h4 Now /h4  
+		 div  
+		 p class  summary  Fair  /p  p class  temp  Temperature  8 deg F /p  
+		 dl class  summaryText   
+ 			 dt Humidity    /dt  dd id  humidity   50%          /dd  
+   			 dt Wind Speed  /dt  dd id  windspeed  Calm         /dd  
+                         dt Barometer   /dt  dd id  pressure   30.65 in.    /dd
+                         dt Dewpoint    /dt  dd id  dewpoint   -7 deg F     /dd  
+ 			 dt Heat Index  /dt  dd id  heatindex  8 deg F      /dd  
+ 			 dt Wind Chill  /dt  dd id  windchill  8 deg F      /dd  
+			 dt Visibility  /dt  dd id  visibility 10 mi        /dd  
+			 dt Sunrise     /dt  dd 7 19 AM EST                 /dd  
+			 dt Sunset      /dt  dd 4 43 PM EST                 /dd 			 
+		 /dl  
+		 
+	 p class  time  Updated  9 51 AM EST SUN JAN 7 2018 /p  
+	 /div  
+ /div  
+ !--   current weather --          
