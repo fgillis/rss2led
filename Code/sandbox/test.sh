@@ -1,6 +1,4 @@
-curl  http://fiercebiotech.com/rss/biotech/xml > temp.txt
-
-exit
+#!/bin/csh
 
 python3 test_3.py
 

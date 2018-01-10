@@ -1,15 +1,16 @@
 #!/Library/Frameworks/Python.framework/Versions/3.6/bin/python3
 
 import sys
-import os, time, threading, random, sys
 import ssl
 import feedparser
 
-# The following lines were added to fix a "rejected certificate" error.
+# The following  was added to fix a "rejected certificate" error.
+# -------
 if hasattr(ssl, '_create_unverified_context'):
     ssl._create_default_https_context = ssl._create_unverified_context
 
 # Sample feed
+# -------
 feed = feedparser.parse("https://www.fiercebiotech.com/rss/biotech/xml")
 
 feed_title = feed['feed']['title']
