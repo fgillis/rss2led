@@ -5,38 +5,35 @@ import sys, ssl, feedparser
 if hasattr(ssl, '_create_unverified_context'):
   ssl._create_default_https_context = ssl._create_unverified_context
 
-# Get number of command line arguments in call to python
-# --------------------------------------------------------------------------
-args = len(sys.argv)
-
-# Assign first two arguments from command line
+# Assign the arguments from command line
 # --------------------------------------------------------------------------
 rssfeed = str(sys.argv[1])
-display = int(sys.argv[2])
-
-# Initialize list 'info' and assign remaining arguments from command line
-# --------------------------------------------------------------------------
-info = [rssfeed, display]
-for i in range(3, args):
-  info.append(sys.argv[i])
+rssname = str(sys.argv[2])
+display = int(sys.argv[3])
+entry   = str(sys.argv[4])
 
 # Check success of assignments of command line arguments (for debug only)
 # --------------------------------------------------------------------------
-# print(info)
+# print(rssfeed)
+# print(rssname)
+# print(display)
+# print(entry)
 
 # read and parse the "rssfeed" site
 # --------------------------------------------------------------------------
 d = feedparser.parse(rssfeed)
 
-# Output scrape results
+# Open file and write single-line scrape results
 # --------------------------------------------------------------------------
-print (d['feed']['title'])
-print ('')
+print("Writing text files for %s" % (rssname))
 
 for i in range(0, display):
-  for j in range(2, args-1):
-    print (d['entries'][i][info[j]])
-  print ('')
+  file = ("%s_%d.txt" %(rssname, i))
+  outp = (d['entries'][i][entry])
 
+  f = open(file, 'w')
+  f.write(outp)
+  f.close()
+  
 sys.exit(0)
 
